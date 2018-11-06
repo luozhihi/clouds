@@ -1,0 +1,15 @@
+spring:
+  application:
+    name: zuul
+  cloud:
+    config:
+      label: master
+      profile: test
+      uri: http://localhost:8081
+server:
+  port: 8083
+zuul:
+  routes:
+    test:
+      path: /test/**
+      serviceId: pro1

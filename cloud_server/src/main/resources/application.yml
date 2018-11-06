@@ -1,0 +1,15 @@
+ server:
+   port: 80
+ eureka:
+   instance:
+     hostname: localhost
+   client:
+     register-with-eureka: true
+     fetch-registry: false
+     eureka-server-connect-timeout-seconds: 30
+     eureka-server-read-timeout-seconds: 30
+     service-url:
+        defaultZone: http://${eureka.instance.hostname}:${server.port}/eureka/
+ spring:
+   application:
+     name: server

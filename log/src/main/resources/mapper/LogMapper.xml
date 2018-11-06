@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.lzh.log.dao.LogMapper">
+	<insert id="addLog" parameterType="com.lzh.log.Entity.Log">
+		insert into t_log value(null,#{operation},#{path},#{method},#{marker},#{time},#{user.id})
+	</insert>
+</mapper>

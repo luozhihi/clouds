@@ -1,0 +1,21 @@
+spring:
+  application:
+    name: pro1
+  cloud:
+    config:
+      label: master
+      profile: test
+      uri: http://localhost:8081
+    bus:
+      refresh:
+        enabled: true
+server:
+  port: 8082
+logging:
+  level:
+    root: debug
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
