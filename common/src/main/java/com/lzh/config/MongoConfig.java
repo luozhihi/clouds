@@ -75,12 +75,20 @@ public class MongoConfig {
         String host = "111.230.47.161";
         int port = 27017;
         System.out.println(host + ":" + port);
-        MongoClient mongoClient = new MongoClient(host, port);
+        MongoCredential credential = MongoCredential.createCredential("root", "admin", "root".toCharArray());
+        ServerAddress serverAddress = new ServerAddress(host,port);
+
+        MongoClientOptions.Builder builder = new MongoClientOptions.Builder();
+
+        MongoClientOptions mongoClientOptions = builder.build();
+
+        MongoClient mongoClient = new MongoClient(serverAddress,credential,mongoClientOptions);
+
         MongoDatabase test = mongoClient.getDatabase("test");
 
         MongoCollection<Document> collections = test.getCollection("test");
 
-//        collections.insertOne(new Document().append("root","root"));
+        collections.insertOne(new Document().append("root","root"));
 
         BasicDBObject query = new BasicDBObject();
         query.append("root","root");
