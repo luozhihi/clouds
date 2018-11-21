@@ -3,6 +3,7 @@ package com.lzh.config;
 import com.mongodb.*;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.result.DeleteResult;
 import org.bson.Document;
@@ -92,6 +93,10 @@ public class MongoConfig {
 
         BasicDBObject query = new BasicDBObject();
         query.append("root","root");
+        FindIterable<Document> documents = collections.find(query);
+        FindIterable<Document> result = documents.skip(10).limit(10);
+        MongoCursor<Document> iterator = result.iterator();
+
         // 调用findOneAndDelete删除一个文档的时候如果存在则删除并返回文档，不存在返回null
         Document oneAndDelete = collections.findOneAndDelete(query);
         // 调用deleteOne删除一个文档的时候，将返回删除的文档数
