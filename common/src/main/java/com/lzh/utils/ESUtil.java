@@ -48,28 +48,25 @@ import static org.elasticsearch.common.xcontent.XContentFactory.jsonBuilder;
  * @author chenxiaojian
  * @date 2018年1月9日 下午5:03:34
  */
-@Component
-@RefreshScope
+//@Component
+//@RefreshScope
 public class ESUtil {
 
     private static final Logger logger = LoggerFactory.getLogger(ESUtil.class);
 
     private final static int MAX = 10000;
 
-    TransportClient client;
+    private static TransportClient client;
 
-    private String clusterName = "elasticsearch";
+    private static String clusterName = "elasticsearch";
 
-    private String clusterAddress = "111.230.47.161:9300";
+    private static String clusterAddress = "111.230.47.161:9300";
 
-    public static void main(String[] args) throws Exception {
-    }
 
     /**
      * client初始化
      */
-    @PostConstruct
-    public void init() {
+    static{
         try {
             Settings settings = Settings.builder()
                     .put("cluster.name", clusterName).build();
@@ -78,12 +75,12 @@ public class ESUtil {
              * https://www.elastic.co/guide/en/x-pack/current/java-clients.html
              */
 
-            this.client = new PreBuiltTransportClient(settings);
+            client = new PreBuiltTransportClient(settings);
             String[] nodes = clusterAddress.split(",");
             for(String node : nodes) {
                 if (node.length() > 0) {
                     String[] hostPort = node.split(":");
-                    this.client.addTransportAddress(
+                    client.addTransportAddress(
                             new TransportAddress(InetAddress.getByName(hostPort[0]), Integer.parseInt(hostPort[1])));
                 }
             }
@@ -99,7 +96,7 @@ public class ESUtil {
      * @param _id 数据id
      * @param json 数据
      */
-    public void insertData(String index, String type, String _id, Map<String, ?> source)
+    public static void insertData(String index, String type, String _id, Map<String, ?> source)
             throws Exception {
         client.prepareIndex(index, type).setId(_id)
                 .setSource(source)
@@ -113,7 +110,7 @@ public class ESUtil {
      * @param _id 数据id
      * @param json 数据
      */
-    public void updateData(String index, String type, String _id, String field,boolean value)
+    public static void updateData(String index, String type, String _id, String field,boolean value)
             throws Exception {
         UpdateRequest updateRequest = new UpdateRequest(index, type, _id)
                 .doc(jsonBuilder()
@@ -130,7 +127,7 @@ public class ESUtil {
      * @param type 类型
      * @param _id 数据id
      */
-    public void deleteData(String index, String type, String _id)
+    public static void deleteData(String index, String type, String _id)
             throws Exception {
         client.prepareDelete(index, type, _id)
                 .get();
@@ -142,7 +139,7 @@ public class ESUtil {
      * @param type 类型
      * @param _id 数据id
      */
-    public long deleteData(String index, String type, ESQueryBuilder builder)
+    public static long deleteData(String index, String type, ESQueryBuilder builder)
             throws Exception {
         BulkByScrollResponse response = DeleteByQueryAction.INSTANCE.newRequestBuilder(client)
                 .filter(builder.listBuilders()).source(index)
@@ -158,7 +155,7 @@ public class ESUtil {
      * @param type 类型
      * @param data (_id 主键, json 数据)
      */
-    public void bulkInsertData(String index, String type, Map<String, Object> data)
+    public static void bulkInsertData(String index, String type, Map<String, Object> data)
             throws Exception {
         BulkRequestBuilder bulkRequest = client.prepareBulk();
         data.forEach((param1, param2) -> {
@@ -175,7 +172,7 @@ public class ESUtil {
      * @param type 类型
      * @param jsonList 批量数据
      */
-    public void bulkInsertData(String index, String type, List<Map<String, Object>> data)
+    public static void bulkInsertData(String index, String type, List<Map<String, Object>> data)
             throws Exception {
         BulkRequestBuilder bulkRequest = client.prepareBulk();
         data.forEach(item -> {
@@ -191,7 +188,7 @@ public class ESUtil {
      * @param type 类型
      * @param constructor 查询构造
      */
-    public String searchById(String index, String type, String _id)
+    public static String searchById(String index, String type, String _id)
             throws Exception {
         return client.prepareGet(index, type, _id).get().getSourceAsString();
     }
@@ -202,7 +199,7 @@ public class ESUtil {
      * @param type 类型
      * @param constructor 查询构造
      */
-    public Map<String, Object> searchMapById(String index, String type, String _id)
+    public static Map<String, Object> searchMapById(String index, String type, String _id)
             throws Exception {
         return client.prepareGet(index, type, _id).get().getSourceAsMap();
     }
@@ -213,7 +210,7 @@ public class ESUtil {
      * @param type 类型
      * @param constructor 查询构造
      */
-    public List<String> search(String index, String type, ESQueryBuilder builder)
+    public static List<String> search(String index, String type, ESQueryBuilder builder)
             throws Exception {
         List<String> result = new ArrayList<>();
         SearchRequestBuilder searchRequestBuilder = createSearchRequestBuilder(index, type, builder)
@@ -235,7 +232,7 @@ public class ESUtil {
      * @param type 类型
      * @param constructor 查询构造
      */
-    public SearchResponse searchResponse(String index, String type, QueryBuilder queryBuilder, FieldSortBuilder sortBuilder, Integer from, Integer size)
+    public static SearchResponse searchResponse(String index, String type, QueryBuilder queryBuilder, FieldSortBuilder sortBuilder, Integer from, Integer size)
             throws Exception {
         SearchRequestBuilder searchRequestBuilder = client.prepareSearch(index).setTypes(type).setQuery(queryBuilder);
         if (sortBuilder != null) {
@@ -254,7 +251,7 @@ public class ESUtil {
         return sr;
     }
 
-    public Map<String, Long> aggTopForTask(String index, String type, QueryBuilder queryBuilder, String groupBy,Integer from, Integer size)
+    public static Map<String, Long> aggTopForTask(String index, String type, QueryBuilder queryBuilder, String groupBy,Integer from, Integer size)
             throws Exception {
 
         SearchRequestBuilder searchRequestBuilder = client.prepareSearch(index).setTypes(type).setQuery(queryBuilder);
@@ -276,7 +273,7 @@ public class ESUtil {
 
     }
 
-    public Map<String, Long> aggAlarmCountByDay(String index, String type, DateHistogramAggregationBuilder field, QueryBuilder builder)
+    public static Map<String, Long> aggAlarmCountByDay(String index, String type, DateHistogramAggregationBuilder field, QueryBuilder builder)
             throws Exception{
         SearchRequestBuilder searchRequestBuilder = client.prepareSearch(index).setTypes(type).setQuery(builder);
 
@@ -294,7 +291,7 @@ public class ESUtil {
         return map;
     }
 
-    public Map<String, Long> aggDynamicForTask(String index, String type, QueryBuilder queryBuilder, String groupBy, Integer size)
+    public static Map<String, Long> aggDynamicForTask(String index, String type, QueryBuilder queryBuilder, String groupBy, Integer size)
             throws Exception{
         SearchRequestBuilder searchRequestBuilder = client.prepareSearch(index).setTypes(type).setQuery(queryBuilder);
 
@@ -320,11 +317,11 @@ public class ESUtil {
      * @param type 类型
      * @param constructor 查询构造
      */
-    public ConcurrentHashMap<String,HashSet<String>> searchResponseByMap(String index, String type, QueryBuilder queryBuilder, Integer taskCount)
+    public static ConcurrentHashMap<String,HashSet<String>> searchResponseByMap(String index, String type, QueryBuilder queryBuilder, Integer taskCount)
             throws Exception {
         return fetchAllRecordsByScrollId(index,type,queryBuilder,taskCount);
     }
-    public ConcurrentHashMap<String,HashSet<String>> fetchAllRecordsByScrollId(String index, String type, QueryBuilder queryBuilder, Integer taskCount) {
+    public static ConcurrentHashMap<String,HashSet<String>> fetchAllRecordsByScrollId(String index, String type, QueryBuilder queryBuilder, Integer taskCount) {
         //要将所有命中的记录取出，拿到他的taskSerial，最终统计有多少有效的TaskSerial，用来做分页的依据
         ConcurrentHashMap<String,HashSet<String>> targetsByTask = new ConcurrentHashMap();
 
@@ -377,7 +374,7 @@ public class ESUtil {
      * @param type 类型
      * @param constructor 查询构造
      */
-    public List<String> searchStr(String index, String type, QueryBuilder builder, FieldSortBuilder sortBuilder, Integer from, Integer size)
+    public static List<String> searchStr(String index, String type, QueryBuilder builder, FieldSortBuilder sortBuilder, Integer from, Integer size)
             throws Exception {
         List<String> ret = new LinkedList<>();
         SearchResponse sr = searchResponse(index, type, builder, sortBuilder, from, size);
@@ -396,7 +393,7 @@ public class ESUtil {
      * @param type 类型
      * @param constructor 查询构造
      */
-    public long statCount(String index, String type, ESQueryBuilder builder) throws Exception {
+    public static long statCount(String index, String type, ESQueryBuilder builder) throws Exception {
         SearchRequestBuilder searchRequestBuilder = client.prepareSearch(index).setTypes(type)
                 .setQuery(builder.listBuilders());
         SearchResponse searchResponse = searchRequestBuilder.execute().actionGet();
@@ -409,7 +406,7 @@ public class ESUtil {
      * @param type 类型
      * @param constructor 查询构造
      */
-    public long statCount(String index, String type, QueryBuilder builder) throws Exception {
+    public static long statCount(String index, String type, QueryBuilder builder) throws Exception {
         SearchRequestBuilder searchRequestBuilder = client.prepareSearch(index).setTypes(type)
                 .setQuery(builder)
                 .setSize(0);
@@ -425,7 +422,7 @@ public class ESUtil {
      * @param builder
      * @return
      */
-    public String searchOne(String index, String type, ESQueryBuilder builder) throws Exception {
+    public static String searchOne(String index, String type, ESQueryBuilder builder) throws Exception {
         SearchRequestBuilder searchRequestBuilder = createSearchRequestBuilder(index, type, builder)
                 .addSort(createSortBuilder(builder));
         searchRequestBuilder.setSize(1);
@@ -447,8 +444,7 @@ public class ESUtil {
      * @param groupBy
      * @return
      */
-    @SuppressWarnings("unchecked")
-    public Map<Object, Object> statSearch(String index, String type, ESQueryBuilder builder, String groupBy) throws Exception  {
+    public static Map<Object, Object> statSearch(String index, String type, ESQueryBuilder builder, String groupBy) throws Exception  {
 
         Map<Object, Object> map = new HashMap<>();
         builder = new ESQueryBuilder();
@@ -468,7 +464,7 @@ public class ESUtil {
         return map;
     }
 
-    public List<InternalDateHistogram.Bucket> statSearchByDateHistogram(String index, String type, QueryBuilder builder, DateHistogram dh)
+    public static List<InternalDateHistogram.Bucket> statSearchByDateHistogram(String index, String type, QueryBuilder builder, DateHistogram dh)
             throws Exception {
         SearchRequestBuilder searchRequestBuilder = client.prepareSearch(index).setTypes(type);
         searchRequestBuilder.setQuery(builder);
@@ -499,7 +495,7 @@ public class ESUtil {
      * @param builder
      * @return
      */
-    private SearchRequestBuilder createSearchRequestBuilder(String index, String type, ESQueryBuilder builder) throws Exception {
+    private  static SearchRequestBuilder createSearchRequestBuilder(String index, String type, ESQueryBuilder builder) throws Exception {
         SearchRequestBuilder searchRequestBuilder = client.prepareSearch(index).setTypes(type);
         searchRequestBuilder.setQuery(builder.listBuilders());
         int size = builder.getSize();
@@ -523,7 +519,7 @@ public class ESUtil {
      * @param queryBuilder
      * @return
      */
-    private FieldSortBuilder createSortBuilder(ESQueryBuilder queryBuilder) {
+    private static FieldSortBuilder createSortBuilder(ESQueryBuilder queryBuilder) {
         FieldSortBuilder sortBuilder = null;
         if (queryBuilder.getAsc() != null && queryBuilder.getAsc().length() > 0) {
             sortBuilder = new FieldSortBuilder(queryBuilder.getAsc());
@@ -541,11 +537,11 @@ public class ESUtil {
     /**
      * 关闭链接
      */
-    public void close() {
+    public static void close() {
         client.close();
     }
 
-    public TransportClient getClient() {
+    public static TransportClient getClient() {
         return client;
     }
 
