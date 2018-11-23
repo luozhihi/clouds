@@ -22,7 +22,6 @@ public class LogAdvice {
     public RestTemplate restTemplate;
     @Autowired
     private KafkaTemplate<String,String> kafkaTemplate;
-
     @Around("@annotation(opsLog)")
     public Object doAfterReturning(ProceedingJoinPoint pjp, OPSLog opsLog) {
 //        MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
