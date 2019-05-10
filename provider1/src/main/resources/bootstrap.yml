@@ -6,14 +6,14 @@ spring:
       label: master
       profile: test
       uri: http://localhost:8081
-    bus:
-      refresh:
-        enabled: true
+#    bus:
+#      refresh:
+#        enabled: true
 server:
   port: 8082
 logging:
   level:
-    root: debug
+    root: INFO
 management:
   endpoints:
     web:
